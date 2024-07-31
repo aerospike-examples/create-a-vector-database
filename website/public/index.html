@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create a Produc for Creatures of Mythology Bank</title>
+    <link rel="stylesheet" href="create_product.css ">
+    <link rel="icon" type="image/x-icon" href="formfavicon.jpeg">
+</head>
+<body>
+    <div class="container">
+        <img src="CreaturesOfMythologyBankLogoWhiteSmall.jpeg" alt="Bank Logo" class="logo">
+        <h1>Enter your product details</h1>
+        <form id="createProduct" data-netlify="true">
+            <label for="productDropdown">Select an option:</label>
+            <select id="productDropdown" name="productDropdown" required>
+                <option value="" disabled selected>Select a product type</option>
+                <option value="Checking Product">Checking Product</option>
+                <option value="Credit Card Product">Credit Card Product</option>
+                <option value="Line of Credit">Line of Credit</option>
+                <option value="Mortgage Product">Mortgage Product</option>
+                <option value="Mutual Funds">Mutual Funds</option>
+                <option value="Savings Product">Savings Product</option>
+                <option value="Wealth Management">Wealth Management</option>
+            </select>
+            
+            <label for="productName">Product name:</label>
+            <input type="text" id="productName" name="productName" required>
+
+            <label for="productDesc">Product Description:</label>
+            <div class="dragonHolder">
+                <img src="dragon on wall small.png" class="dragon">
+                <textarea id="productDesc" name="productDesc" rows="6" required></textarea>    
+            </div>
+
+            <div class="button-container">
+                <button type="submit">Submit</button>
+                <button type="reset">Clear</button>
+            </div>
+        </form>
+    </div>
+
+    <script>
+        function validateForm() {
+            /*
+            const dropdown = document.getElementById('productDropdown');
+            const singleLine = document.getElementById('productName').value.trim();
+            const multiLine = document.getElementById('productDesc').value.trim();
+
+            // Check if dropdown has a selected value
+            if (dropdown.value === "") {
+                alert("Please select an option from the dropdown.");
+                dropdown.focus();
+                return false; // Prevent form submission
+            }
+
+            // Check if single line entry is empty
+            if (singleLine === "") {
+                alert("Please enter your name.");
+                document.getElementById('singleLine').focus();
+                return false; // Prevent form submission
+            }
+
+            // Check if multi line entry is empty
+            if (multiLine === "") {
+                alert("Please provide your feedback.");
+                document.getElementById('multiLine').focus();
+                return false; // Prevent form submission
+            }
+
+            // If all validations pass, allow form submission
+            */
+            return true;
+        }
+    </script>
+</body>
+</html>

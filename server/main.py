@@ -6,13 +6,14 @@ from fastapi.responses import StreamingResponse
 from fastapi.middleware.cors import CORSMiddleware
 from llm import create_chat, PROMPT
 from threading import Lock
-from data_loader import create_products, read_products
-from database import add_entry, similarity_search, get_entry_count
-from encoder import create_embedding
+from data_loader import create_products, read_products, get_default_products, read_extra_products
+from database import add_entry, similarity_search, get_all_entries, initialize
+from embedder import create_embedding
 
 embed_lock = Lock()
 llm_lock = Lock()
 PRODUCT_FILE = '../data/products.csv'
+EXTRA_PRODUCT_FILE = '../data/createProduct.csv'
 
 app = FastAPI(
     title="Aerospike Vector RAG Demo",
@@ -34,11 +35,19 @@ app.add_middleware(
 async def reset_database():
     create_products(PRODUCT_FILE)
 
-@app.get("/rest/v1/get_products")
+@app.get("/rest/v1/get_products/")
 async def get_products():
-    return read_products(PRODUCT_FILE)
+    return get_all_entries()
     
-@app.get("/rest/v1/create_database")
+@app.get("/rest/v1/get_extra_products/")
+async def get_extra_products():
+    products = read_extra_products(EXTRA_PRODUCT_FILE)
+    print("Loaded products: ", len(products))
+    for p in products:
+        add_entry(p)
+    return get_all_entries()
+    
+@app.get("/rest/v1/create_database/")
 async def create_database():
     products = read_products(PRODUCT_FILE)
     for p in products:
@@ -48,11 +57,6 @@ async def create_database():
 
 @app.post("/rest/v1/chat/")
 async def create_chat_completion(text: Annotated[str, Form()]):
-    if (get_entry_count() == 0):
-        products = read_products(PRODUCT_FILE)
-        for p in products:
-            add_entry(p)
-
     with embed_lock:
         embedding = create_embedding(text)
     start = time.time()
@@ -120,4 +124,6 @@ def stream_response(prompt, time_taken, docs):
     
     return
 
+# Initialize the database with the default products on startup
+initialize(get_default_products())
 

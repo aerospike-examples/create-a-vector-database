@@ -132,6 +132,9 @@ def __get_default_products():
         }
     ]
 
+def get_default_products():
+    return __get_default_products()
+
 # Create a data file with the default products
 def create_products(file: str):
     products = __get_default_products()
@@ -157,6 +160,18 @@ def read_products(file: str):
             results.append(row)
     return results
 
-#DATA_FILE = '../data/products.csv'
-#create_products(DATA_FILE)
-#read_products(DATA_FILE)
+def read_extra_products(file: str):
+    results = []
+    with open(file, mode='r',newline='') as file:
+        fieldnames = ["productDropdown","productName","productDesc","ip","user_agent","referrer","created_at"]
+        reader = csv.DictReader(file, fieldnames=fieldnames)
+        next(reader, None)  # Skip over the header
+        for row in reader:
+            results.append({'type':row['productDropdown'], 'name':row['productName'], 'feature':row['productDesc']})
+    return results
+
+if __name__ == '__main__':
+    DATA_FILE = '../data/products.csv'
+    #create_products(DATA_FILE)
+    #read_products(DATA_FILE)
+    print(read_extra_products(DATA_FILE))

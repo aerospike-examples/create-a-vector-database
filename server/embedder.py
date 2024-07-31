@@ -8,7 +8,6 @@ logger.setLevel(logging.CRITICAL)
 # The image or text encoding model.
 # model = SentenceTransformer('sentence-transformers/all-MiniLM-L6-v2')
 model = SentenceTransformer("all-MiniLM-L6-v2")
-MODEL_DIM = 384
 
 def create_embedding(data):
     #logger.debug(f"Encoding data {data}")
@@ -40,11 +39,8 @@ def cosineSimilarity(vect1, vect2):
     return dotProduct / sqrt(magnitude1 * magnitude2)
 
 
-# Test code
+# Code to access
 if __name__ == '__main__':
-    print("Running")
-    vector = create_embedding("This is a long sentence which we want to transform")
-    v1 = [1.0, 1.02]
-    v2 = [10.0, 11.0]
-    print(cosineSimilarity(v1, v2))
-    print(cosineSimilarity(v2, v1))
+    sentence = "This is a long sentence which we want to transform"
+    vector = create_embedding(sentence)
+    print(vector, len(vector))

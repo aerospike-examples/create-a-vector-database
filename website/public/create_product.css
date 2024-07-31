@@ -1,0 +1,93 @@
+body {
+    font-family: Arial, sans-serif;
+    background-color: #f4f4f4;
+    margin: 0;
+    padding: 20px;
+}
+
+.container {
+    max-width: 500px;
+    margin: auto;
+    background: white;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.logo {
+    display: block;
+    margin: 0 auto 2px;
+    width: 150px;
+    max-width: 100%;
+    height: auto;
+}
+
+.dragonHolder {
+    position: relative;
+    margin: 0;
+    padding: 0;
+}
+.dragon {
+    position: absolute;
+    right: 20px;
+    top: -64px;
+    width: 80px;
+}
+
+h1 {
+    text-align: center;
+    margin-bottom: 20px;
+    margin-top: 0;
+}
+
+label {
+    display: block;
+    margin-bottom: 5px;
+}
+
+select, input[type="text"], textarea {
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 15px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    box-sizing: border-box;
+    font-size: 16px;
+}
+
+.button-container {
+    display: flex;
+    justify-content: space-between;
+}
+
+button {
+    padding: 10px 15px;
+    border: none;
+    border-radius: 4px;
+    background-color: #0097d3;
+    color: white;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+button[type="reset"] {
+    background-color: #f26552;
+}
+
+button:hover {
+    background-color: #0056b3;
+}
+
+textarea {
+    font: inherit;
+}
+
+@media (max-width: 600px) {
+    .button-container {
+        flex-direction: column;
+    }
+
+    button {
+        margin-bottom: 10px;
+    }
+}
