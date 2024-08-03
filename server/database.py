@@ -9,7 +9,6 @@ __comparator_result = ComparatorResult.LARGER_IS_BETTER
 
 def initialize(products):
     for p in products:
-        print("Adding: ", p)
         add_entry(p)
 
 def set_comparator(comparator, comparator_result):

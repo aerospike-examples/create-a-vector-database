@@ -4,7 +4,7 @@ from typing import Annotated
 from fastapi import FastAPI, HTTPException, Form, status
 from fastapi.responses import StreamingResponse
 from fastapi.middleware.cors import CORSMiddleware
-from llm import create_chat, PROMPT
+from llm import create_chat, PROMPT_WITH_VECTOR_SEARCH, PROMPT_HALLUCINATION, PROMPT_NO_HALLUCINATION
 from threading import Lock
 from data_loader import create_products, read_products, get_default_products, read_extra_products
 from database import add_entry, similarity_search, get_all_entries, initialize
@@ -51,14 +51,25 @@ async def get_extra_products():
 async def create_database():
     products = read_products(PRODUCT_FILE)
     for p in products:
-        print("Adding: ", p)
         add_entry(p)
     return len(products)
 
-@app.post("/rest/v1/chat/")
-async def create_chat_completion(text: Annotated[str, Form()]):
-    with embed_lock:
-        embedding = create_embedding(text)
+def form_response_no_vect_db(embedding, text: Annotated[str, Form()]):
+    start = time.time()
+    time_taken = time.time() - start
+
+    docs = {}
+
+    return StreamingResponse(
+        stream_response(
+            PROMPT_HALLUCINATION.format(question=text),
+            time_taken, 
+            docs
+        ), 
+        media_type="text"
+    )
+
+def form_response_with_vect_db(embedding, text: Annotated[str, Form()]):
     start = time.time()
     results = similarity_search(embedding, 5)
     time_taken = time.time() - start
@@ -70,25 +81,25 @@ async def create_chat_completion(text: Annotated[str, Form()]):
         context += f"type {product['type']} name {product['name']} description {product['feature']}\n\n"
         docs[product['name']] = product['type']
 
-    #for result in results:
-    #    context += f"{result.fields['content']}\n\n"
-    #    docs[result.fields["title"]] = result.fields["url"]
-
-    #context = "Creatures of Mythology Bank was founded in 1777 by William Greystanes in a land far, far away. There remains "
-    #"mystery around why the bank was founded and if any mythological creatures were involved." 
-    
     return StreamingResponse(
         stream_response(
-            PROMPT.format(question=text, context=context),
+            PROMPT_WITH_VECTOR_SEARCH.format(question=text, context=context),
             time_taken, 
             docs
         ), 
         media_type="text"
     )
 
+@app.post("/rest/v1/chat/")
+async def create_chat_completion(text: Annotated[str, Form()]):
+    with embed_lock:
+        embedding = create_embedding(text)
+
+    return form_response_no_vect_db(embedding, text)
+
 def stream_response(prompt, time_taken, docs):
     yield f"_Query executed in {round(time_taken * 1000, 5)} ms_\n\n"
-    yield f"The following documents will be used to provide context:\n\n"
+    yield f"The following products will be used to provide context:\n\n"
     
     for key in docs:
         yield f"- <b>{docs[key]}</b>: {key}\n"
@@ -105,17 +116,8 @@ def stream_response(prompt, time_taken, docs):
 
             responses = create_chat(prompt)
             for response in responses:
-                print(response)
                 yield response.text
 
-            #response = create_chat(prompt)
-            #yield "\nGot a response!\n"
-            #yield response
-
-            #for chunk in response:
-            #    content = chunk.choices[0].delta.content
-            #    if content is not None:
-            #        yield content
         except:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,

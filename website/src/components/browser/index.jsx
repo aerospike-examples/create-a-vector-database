@@ -44,7 +44,7 @@ const Browser = () => {
 
 	const filterByProductAndSort = (newProductType) => {
 		const results = products.filter(p => p.type === newProductType);
-		return results.sort()
+		return results.sort((a,b) => (a.name > b.name ? 1 : a.name < b.name ? -1 : 0))
 	}
 
 	const getSelectedProduct = () => {

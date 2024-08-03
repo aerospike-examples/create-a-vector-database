@@ -52,7 +52,7 @@ def __get_default_products():
                         'Withdrawals are only permitted during high tide to avoid pesky sea currents.'
         },
         {
-            'name' : __CREDIT_CARD,
+            'type' : __CREDIT_CARD,
             'name':'Phoenix Credit Card',
             'feature':'Burn through expenses and rise from the ashes of debt with our Phoenix Credit Card. Earn '
                         'fiery rewards and never fear a late payment again.'
@@ -169,9 +169,3 @@ def read_extra_products(file: str):
         for row in reader:
             results.append({'type':row['productDropdown'], 'name':row['productName'], 'feature':row['productDesc']})
     return results
-
-if __name__ == '__main__':
-    DATA_FILE = '../data/products.csv'
-    #create_products(DATA_FILE)
-    #read_products(DATA_FILE)
-    print(read_extra_products(DATA_FILE))
