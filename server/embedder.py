@@ -41,6 +41,6 @@ def cosineSimilarity(vect1, vect2):
 
 # Code to access
 if __name__ == '__main__':
-    sentence = "This is a long sentence which we want to transform"
+    sentence = "Dont all shout at once."
     vector = create_embedding(sentence)
     print(vector, len(vector))

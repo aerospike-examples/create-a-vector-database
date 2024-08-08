@@ -38,7 +38,6 @@ def get_all_entries():
         data = dict.copy(this_entry['data'])
         data['vector'] = this_entry['vector'].tolist()
         result.append(data)
-    print("result = ",result)
     return result
 
 def get_entry_count():
@@ -65,25 +64,3 @@ def similarity_search(vect, count = 5):
         if not inserted and len(results) < count:
             results.append((compare_result, this_vector))
     return results
-
-if __name__ == '__main__':
-    add_entry({'type':'Savings Product', 'name':'test savings product', 'feature' : 'a feature description'})
-    print(get_all_entries())
-    print("Current directory = ", os.getcwd())
-    data_loader.create_products("data/products.csv")
-    products = data_loader.read_products("data/products.csv")
-    # set_comparator(encoder.squaredEuclidean, ComparatorResult.SMALLER_IS_BETTER)
-    for p in products:
-        print("Adding: ", p)
-        add_entry(p)
-    print(len(__data))
-    prompt = "can dragons get a checking account at this bank?"
-    vector = embedder.create_embedding(prompt)
-    results = similarity_search(vector, 5)
-    print("\n\n *** Results ***")
-    for idx, data in enumerate(results):
-        print("[",idx,"]: ", data[0], data[1]['data'])
-    #print(len(products))
-
-    #add_entry("hello")
-    #add_entry({'name':'aName', 'type':'aType', 'feature':'afeature'})

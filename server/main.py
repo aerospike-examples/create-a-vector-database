@@ -7,8 +7,9 @@ from fastapi.middleware.cors import CORSMiddleware
 from llm import create_chat, PROMPT_WITH_VECTOR_SEARCH, PROMPT_HALLUCINATION, PROMPT_NO_HALLUCINATION
 from threading import Lock
 from data_loader import create_products, read_products, get_default_products, read_extra_products
-from database import add_entry, similarity_search, get_all_entries, initialize
-from embedder import create_embedding
+from database import add_entry, similarity_search, get_all_entries, initialize, set_comparator
+from embedder import create_embedding, cosineSimilarity, squaredEuclidean
+from ComparatorResult import ComparatorResult
 
 embed_lock = Lock()
 llm_lock = Lock()
@@ -42,7 +43,6 @@ async def get_products():
 @app.get("/rest/v1/get_extra_products/")
 async def get_extra_products():
     products = read_extra_products(EXTRA_PRODUCT_FILE)
-    print("Loaded products: ", len(products))
     for p in products:
         add_entry(p)
     return get_all_entries()
@@ -95,7 +95,8 @@ async def create_chat_completion(text: Annotated[str, Form()]):
     with embed_lock:
         embedding = create_embedding(text)
 
-    return form_response_no_vect_db(embedding, text)
+    # Change this to alternate between a vector DB and no vector DB
+    return form_response_with_vect_db(embedding, text)
 
 def stream_response(prompt, time_taken, docs):
     yield f"_Query executed in {round(time_taken * 1000, 5)} ms_\n\n"
@@ -125,6 +126,10 @@ def stream_response(prompt, time_taken, docs):
             )
     
     return
+
+# Set the database to use cosine similarity for comparisons
+set_comparator(cosineSimilarity, ComparatorResult.LARGER_IS_BETTER)
+#set_comparator(squaredEuclidean, ComparatorResult.SMALLER_IS_BETTER)
 
 # Initialize the database with the default products on startup
 initialize(get_default_products())

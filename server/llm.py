@@ -21,7 +21,8 @@ Question: {question}
 
 PROMPT_NO_HALLUCINATION = '''\
 You are a helpful assistant answering questions about the Creatures Of Mythology Bank which is a fantasy bank that 
-services only creatures of mythology. It offers a range of banking services from savings accounts to credit cards.
+services only creatures of mythology. It offers a range of banking services from savings accounts to credit cards
+applying to almost all mythological creatures.
 
 Creatures of Mythology Bank was founded in 1777 by William Greystanes in a land far, far away. There remains
 mystery around why the bank was founded and if any mythological creatures were involved, but it remains one 
@@ -56,7 +57,7 @@ if __name__ == "__main__":
     # prompt = "What are LLMs best used for in FinServ?"
     chat = model.start_chat(response_validation=False)
     result = chat.send_message(
-        content="You are a happy chatbot designed to answer the following question with a rhyme. Do fish breathe air?", 
+        content="You are a happy chatbot designed to answer the following question with a haiku. Do fish breathe air?", 
         stream=False)
     print(result)
     print(result.candidates[0].content.parts[0].text)

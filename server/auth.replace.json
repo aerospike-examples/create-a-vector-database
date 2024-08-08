@@ -3,7 +3,7 @@
   "project_id": "<project_id>",
   "private_key_id": "<private_key_id>",
   "private_key": "-----BEGIN PRIVATE KEY-----\n<put your private key in here>=\n-----END PRIVATE KEY-----\n",
-  "client_email": "<your email>"
+  "client_email": "<your email>",
   "client_id": "<your client id>",
   "auth_uri": "https://accounts.google.com/o/oauth2/auth",
   "token_uri": "https://oauth2.googleapis.com/token",
