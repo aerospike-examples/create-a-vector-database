@@ -8,9 +8,6 @@ vertexai.init(project="aero-devrel", location="us-central1", credentials=credent
 
 model = GenerativeModel("gemini-1.5-flash-001")
 
-#Using the following context, answer the question and provide an explanation.
-#If you are unable to answer the question, ask for more information.
-
 PROMPT_HALLUCINATION = '''\
 You are a helpful assistant answering questions about the Creatures Of Mythology Bank which is a fantasy bank that 
 services only creatures of mythology. It offers a range of banking services from savings accounts to credit cards 

@@ -6,8 +6,7 @@ logger = logging.getLogger(__name__)
 logger.setLevel(logging.CRITICAL)
 
 # The image or text encoding model.
-# model = SentenceTransformer('sentence-transformers/all-MiniLM-L6-v2')
-model = SentenceTransformer("all-MiniLM-L6-v2")
+model = SentenceTransformer('sentence-transformers/all-MiniLM-L6-v2')
 
 def create_embedding(data):
     #logger.debug(f"Encoding data {data}")
@@ -20,7 +19,8 @@ def squaredEuclidean(vect1, vect2):
     magnitude = 0.0
     for i in range(len(vect1)):
         length = vect1[i] - vect2[i]
-        magnitude = length * length
+        magnitude += length * length
+
     return magnitude
 
 # Calculate the cosine similarity of 2 vectors. The result will be a number in the range [-1, 1]
