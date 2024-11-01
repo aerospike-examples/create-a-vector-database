@@ -1,18 +1,14 @@
-import os
 import time
 from typing import Annotated
 from fastapi import FastAPI, HTTPException, Form, status
 from fastapi.responses import StreamingResponse
 from fastapi.middleware.cors import CORSMiddleware
 from llm import create_chat, PROMPT_WITH_VECTOR_SEARCH, PROMPT_HALLUCINATION, PROMPT_NO_HALLUCINATION
-from threading import Lock
 from data_loader import create_products, read_products, get_default_products, read_extra_products
 from database import add_entry, similarity_search, get_all_entries, initialize, set_comparator
 from embedder import create_embedding, cosineSimilarity, squaredEuclidean
 from ComparatorResult import ComparatorResult
 
-embed_lock = Lock()
-llm_lock = Lock()
 PRODUCT_FILE = '../data/products.csv'
 EXTRA_PRODUCT_FILE = '../data/createProduct.csv'
 
@@ -54,76 +50,67 @@ async def create_database():
         add_entry(p)
     return len(products)
 
-def form_response_no_vect_db(embedding, text: Annotated[str, Form()]):
-    start = time.time()
-    time_taken = time.time() - start
-
-    docs = {}
-
-    return StreamingResponse(
-        stream_response(
-            PROMPT_HALLUCINATION.format(question=text),
-            time_taken, 
-            docs
-        ), 
-        media_type="text"
-    )
-
-def form_response_with_vect_db(embedding, text: Annotated[str, Form()]):
-    start = time.time()
-    results = similarity_search(embedding, 5)
-    time_taken = time.time() - start
-
-    context = ""
-    docs = {}
-    for idx, data in enumerate(results):
-        product = data[1]['data']
-        context += f"type {product['type']} name {product['name']} description {product['feature']}\n\n"
-        docs[product['name']] = product['type']
-
-    return StreamingResponse(
-        stream_response(
-            PROMPT_WITH_VECTOR_SEARCH.format(question=text, context=context),
-            time_taken, 
-            docs
-        ), 
-        media_type="text"
-    )
-
 @app.post("/rest/v1/chat/")
 async def create_chat_completion(text: Annotated[str, Form()]):
-    with embed_lock:
-        embedding = create_embedding(text)
+    start = time.time()
+    docs = {}
+    prompt = text # The default prompt passes the user query directly
+    
+    ##################
+    # Use a prompt with provided context from the vector DB
+    # embedding = create_embedding(text)
+    # start = time.time()
+    # results = similarity_search(embedding, 5)
+    # context = ""
+    
+    # for data in results:
+    #     product = data[1]['data']
+    #     context += f"type {product['type']} name {product['name']} description {product['feature']}\n\n"
+    #     docs[product['name']] = product['type']
+    
+    # prompt = PROMPT_WITH_VECTOR_SEARCH.format(question=text, context=context)
+    
+    ##################
+    # Use a prompt that provides guardrails to combat hallucination
+    # prompt = PROMPT_NO_HALLUCINATION.format(question=text)
+    
+    ##################
+    # Use a prompt that may induce hallucination
+    # prompt = PROMPT_HALLUCINATION.format(question=text)
+    
+    time_taken = time.time() - start
+    
+    return StreamingResponse(
+        stream_response(
+            prompt,
+            time_taken, 
+            docs
+        ), 
+        media_type="text"
+    )
 
-    # Change this to alternate between a vector DB and no vector DB
-    return form_response_with_vect_db(embedding, text)
 
-def stream_response(prompt, time_taken, docs):
+def stream_response(prompt: str, time_taken: float, docs: dict):
     yield f"_Query executed in {round(time_taken * 1000, 5)} ms_\n\n"
-    yield f"The following products will be used to provide context:\n\n"
     
-    for key in docs:
-        yield f"- <b>{docs[key]}</b>: {key}\n"
+    if docs:
+        yield f"The following products will be used to provide context:\n\n"    
+        for key in docs:
+            yield f"- <b>{docs[key]}</b>: {key}\n"
+
+    yield "\nGenerating a response...\n\n"
     
-    if llm_lock.locked():
-        time.sleep(.5)
-        yield "\nWaiting for slot...\n\n"
-
-    with llm_lock:
-        time.sleep(.5)
-        yield "\nGenerating a response...\n\n"
-        
-        try:
-
-            responses = create_chat(prompt)
-            for response in responses:
-                yield response.text
-
-        except:
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail="An error occurred, please try again."
-            )
+    try:
+        response = create_chat(prompt)
+        for chunk in response:
+            content = chunk.choices[0].delta.content
+            if content is not None:
+                yield content
+    except:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="An error occurred, please try again."
+        )
     
     return
 
@@ -133,4 +120,3 @@ set_comparator(cosineSimilarity, ComparatorResult.LARGER_IS_BETTER)
 
 # Initialize the database with the default products on startup
 initialize(get_default_products())
-

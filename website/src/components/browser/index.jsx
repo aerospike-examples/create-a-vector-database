@@ -9,8 +9,8 @@ const Browser = () => {
 	const [dataLoading, setDataLoading] = useState(false)
 
 	const fetchData = async (extraProducts) => {
-		let url = extraProducts ? "http://localhost:8085/rest/v1/get_extra_products/"
-								: "http://localhost:8085/rest/v1/get_products/"
+		let url = extraProducts ? "http://localhost:8080/rest/v1/get_extra_products/"
+								: "http://localhost:8080/rest/v1/get_products/"
 		fetch(url, {
 			method: "GET",
 		})

@@ -1,7 +1,5 @@
 import embedder as embedder
 from ComparatorResult import ComparatorResult
-import data_loader
-import os
 
 __data = []
 __comparator = embedder.cosineSimilarity
@@ -28,8 +26,6 @@ def add_entry(data : str | object):
             else:
                 dataStr += key + ' '  + value + ' '
     vector = embedder.create_embedding(dataStr)
-    #data['vector'] = vector
-    #__data.append(data)
     __data.append({'vector' : vector, 'data' : data})
 
 def get_all_entries():
