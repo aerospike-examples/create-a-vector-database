@@ -54,7 +54,7 @@ async def create_database():
 async def create_chat_completion(text: Annotated[str, Form()]):
     start = time.time()
     docs = {}
-    prompt = text # The default prompt passes the uesr query directly
+    prompt = text # The default prompt passes the user query directly
     
     ##################
     # Use a prompt with provided context from the vector DB
@@ -101,9 +101,11 @@ def stream_response(prompt: str, time_taken: float, docs: dict):
     yield "\nGenerating a response...\n\n"
     
     try:
-        responses = create_chat(prompt)
-        for response in responses:
-            yield response.text
+        response = create_chat(prompt)
+        for chunk in response:
+            content = chunk.choices[0].delta.content
+            if content is not None:
+                yield content
     except:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,

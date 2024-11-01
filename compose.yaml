@@ -1,0 +1,24 @@
+services:
+  server:
+    build:
+      context: .
+      dockerfile: server.Dockerfile
+    container_name: server
+    env_file: config/config.env
+    ports:
+      - 8080:8080
+    networks:
+      - vector-db
+
+  website:
+    build:
+      context: .
+      dockerfile: website.Dockerfile
+    container_name: website
+    ports:
+      - 4173:4173
+    networks:
+      - vector-db
+
+networks:
+  vector-db: {}

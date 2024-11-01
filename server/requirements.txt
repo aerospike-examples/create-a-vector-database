@@ -5,5 +5,6 @@ python-multipart
 
 # RAG dependencies
 torch
+openai
 google-cloud-aiplatform
 sentence-transformers

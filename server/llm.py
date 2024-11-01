@@ -1,12 +1,28 @@
+import os
 from google.oauth2 import service_account
+from google.auth.transport.requests import Request
 import vertexai
-from vertexai.generative_models import GenerativeModel
+from openai import OpenAI
 
-# Credentials to google account to allow login
-credentials = service_account.Credentials.from_service_account_file("auth.json")
-vertexai.init(project="aero-devrel", location="us-central1", credentials=credentials)
+# Initilize OpenAI client
+client = OpenAI()
 
-model = GenerativeModel("gemini-1.5-flash-001")
+# Get env variables
+model = os.getenv("MODEL_ID")
+project = os.getenv('PROJECT_ID')
+location = os.getenv('LOCATION')
+
+# Setup client for OpenAI or Gemini
+if not os.getenv("OPENAI_API_KEY"):
+    # Credentials to google account to allow login
+    vertexai.init(project=project, location=location)
+    credentials = service_account.Credentials.from_service_account_file(os.getenv("PATH_TO_AUTH"), scopes=["https://www.googleapis.com/auth/cloud-platform"])
+    credentials.refresh(Request())    
+    client.api_key = credentials.token
+    client.base_url = f"https://{location}-aiplatform.googleapis.com/v1beta1/projects/{project}/locations/{location}/endpoints/openapi"
+# If using OpenAI and a project is set, add to the client
+elif project:
+    client.project = project
 
 PROMPT_HALLUCINATION = '''\
 You are a helpful assistant answering questions about the Creatures Of Mythology Bank which is a fantasy bank that 
@@ -44,17 +60,17 @@ Context: {context}
 '''
 
 def create_chat(prompt):
-    chat = model.start_chat()
-    return chat.send_message(
-        content=prompt,
+    return client.chat.completions.create(
+        model=model,
+        messages=[{"role": "user", "content": prompt}],
         stream=True,
     )
 
 if __name__ == "__main__":
-    # prompt = "What are LLMs best used for in FinServ?"
-    chat = model.start_chat(response_validation=False)
-    result = chat.send_message(
-        content="You are a happy chatbot designed to answer the following question with a haiku. Do fish breathe air?", 
-        stream=False)
+    prompt = "You are a happy chatbot designed to answer the following question with a haiku. Do fish breathe air?"
+    result = client.chat.completions.create(
+        model=model,
+        messages=[{"role": "user", "content": prompt}]
+    )    
     print(result)
-    print(result.candidates[0].content.parts[0].text)
+    print(result.choices[0].message.content)
